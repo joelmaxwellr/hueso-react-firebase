@@ -1,0 +1,23 @@
+
+  @media print {
+    /* Estilos de página personalizados */
+    @page {
+      size: A4; /* Tamaño de página deseado, como 'A4', 'Letter', etc. */
+    }
+
+    /* Selección de elementos específicos para imprimir */
+    body {
+      font-size: 12pt; /* Tamaño de fuente deseado */
+    }
+
+    .print-only {
+      display: block !important; /* Mostrar solo elementos con la clase .print-only */
+    }
+  }
+  @media print {
+    /* Estilos adicionales para la versión impresa */
+    h2 {
+      color: blue;
+      font-size: 16pt;
+    }
+  }
