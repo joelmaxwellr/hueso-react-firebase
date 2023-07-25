@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext } from 'react'
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, query, orderBy } from "firebase/firestore";
 import { async } from '@firebase/util';
 import { set } from 'firebase/database';
 import PrintButton from './PrintButton';
@@ -18,6 +18,7 @@ export default function Crud() {
     const [precio, setPrecio] = useState(0)
     const [data, setData] = useState([])
     const [fecha, setFecha] = useState("")
+    const [fechaOrden, setFechaOrden] = useState("")
     const [orden, setOrden] = useState("")
     const [estadoImpresion, setEstadoImpresion] = useState("En Espera")
     const [hora, setHora] = useState("")
@@ -39,8 +40,10 @@ export default function Crud() {
 
     const crear = async () => {
         const fechaActual = new Date().toLocaleDateString()
+        const fechaOrdens = new Date().getTime()
         const horaActual = new Date().toLocaleTimeString()
         setFecha(fechaActual)
+        setFechaOrden(fechaOrdens)
         setHora(horaActual)
         console.log(material)
         try {
@@ -49,8 +52,9 @@ export default function Crud() {
                 material: material,
                 descripcion: descripcion,
                 precio: precio,
-                /* orden: setOrden(data.length == 0 ? 1 : data[0].orden + 1), */
+                /* orden: data.length == 0 ? 1 : data[0].orden + 1, */
                 fecha: fecha,
+                fechaOrden: fechaOrden,
                 hora: hora,
                 estadoImpresion: estadoImpresion
             });
@@ -63,12 +67,12 @@ export default function Crud() {
     }
 
     const fetchData = async () => {
-        const querySnapshot = await getDocs(collection(db, "ordenes")); // Reemplaza 'nombre_coleccion' con el nombre de tu colección en Firestore
+        const querySnapshot = await getDocs(query(collection(db, "ordenes"), orderBy("fechaOrden", "desc"))); // Reemplaza 'nombre_coleccion' con el nombre de tu colección en Firestore
         const newArray = []
         querySnapshot.docs.map(doc => {
-            newArray.push({ ...doc.data(), id: doc.id })
+            newArray.push({ ...doc.data(), fechaOrden: doc.fechaOrden , id: doc.id })
         });
-        newArray.sort((a, b) => b.orden - a.orden);
+        /* newArray.sort((a, b) => b.fecha - a.fecha); */
 
         setData(newArray);
         console.log(newArray)
