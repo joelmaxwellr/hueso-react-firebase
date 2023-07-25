@@ -13,32 +13,46 @@ import IdPrintProvider from './IdPrintProvider';
 
 export default function Crud() {
     const [nombreCliente, setNombreCliente] = useState("")
-    const [material, setMaterial] = useState("")
+    const [material, setMaterial] = useState("DTF")
     const [descripcion, setDescripcion] = useState("")
     const [precio, setPrecio] = useState(0)
     const [data, setData] = useState([])
+    const [fecha, setFecha] = useState("")
+    const [orden, setOrden] = useState("")
+    const [estadoImpresion, setEstadoImpresion] = useState("En Espera")
+    const [hora, setHora] = useState("")
     const [actualizando, setActualizando] = useState(false)
     const [mostrarBoton, setMostrarBoton] = useState(false)
     const [clienteActualizando, setClienteActualizando] = useState(null);
 
     const db = getFirestore()
 
-    const limpiarCampos = () => {
+    const limpiarCampos = (e) => {
         setNombreCliente("");
         setMaterial("");
         setPrecio(0);
         setDescripcion("");
+        setMaterial("DTF")
+        setEstadoImpresion("En Espera")
     }
 
 
     const crear = async () => {
-
+        const fechaActual = new Date().toLocaleDateString()
+        const horaActual = new Date().toLocaleTimeString()
+        setFecha(fechaActual)
+        setHora(horaActual)
+        console.log(material)
         try {
             const docRef = await addDoc(collection(db, "ordenes"), {
                 nombreCliente: nombreCliente,
                 material: material,
                 descripcion: descripcion,
-                precio: precio
+                precio: precio,
+                /* orden: setOrden(data.length == 0 ? 1 : data[0].orden + 1), */
+                fecha: fecha,
+                hora: hora,
+                estadoImpresion: estadoImpresion
             });
             console.log("Document written with ID: ", docRef.id);
         } catch (e) {
@@ -54,6 +68,8 @@ export default function Crud() {
         querySnapshot.docs.map(doc => {
             newArray.push({ ...doc.data(), id: doc.id })
         });
+        newArray.sort((a, b) => b.orden - a.orden);
+
         setData(newArray);
         console.log(newArray)
     };
@@ -88,6 +104,10 @@ export default function Crud() {
                 material: material,
                 descripcion: descripcion,
                 precio: precio,
+                orden: orden,
+                fecha: fecha,
+                hora: hora,
+                estadoImpresion: estadoImpresion
             });
             console.log("Document successfully updated!");
         } catch (e) {
@@ -98,7 +118,7 @@ export default function Crud() {
         fetchData();
         setMostrarBoton(false)
     }
-    
+
     const cancelar = () => {
         setActualizando(false);
         limpiarCampos();
@@ -110,9 +130,22 @@ export default function Crud() {
         <div>
 
             <input type="text" id='nombreCliente' placeholder='cliente' value={nombreCliente} onChange={(e) => setNombreCliente(e.target.value)} />
-            <input type="text" id='material' placeholder='material' value={material} onChange={(e) => setMaterial(e.target.value)} />
-            <input type="number" id='precio' placeholder='precio' value={precio} onChange={(e) => setPrecio(e.target.value)} />
-            <input type="text" id='descripcion' placeholder='descripcion' value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
+            {/*  <input type="text" id='material' placeholder='material' value={material} onChange={(e) => setMaterial(e.target.value)} /> */}
+            <select name="material" id="material" value={material} onChange={(e) => setMaterial(e.target.value)}>
+                <option value="DTF">DTF</option>
+                <option value="UV">UV</option>
+                <option value="Sublimación">Sublimación</option>
+                <option value="Impresión Directa">Impresion Directa</option>
+            </select>
+            <input type="number" id='precio' placeholder='Precio' value={precio} onChange={(e) => setPrecio(e.target.value)} />
+            <input type="text" id='descripcion' placeholder='Descripción' value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
+            <select name="estadoImpresion" id="estadoImpresion" value={estadoImpresion} onChange={(e) => setEstadoImpresion(e.target.value)}>
+                <option value="En Espera">En Espera</option>
+                <option value="Aprobado" >Aprobado</option>
+                <option value="Cancelado">Cancelado</option>
+                <option value="Imprimiendo">Imprimiendo</option>
+                <option value="Listo">Listo</option>
+            </select>
             {!actualizando ? <button onClick={crear}>Crear</button> : <div><button onClick={guardarActualizacion}>Guardar Actualización</button> <button onClick={cancelar}>Cancelar</button></div>}
             <div>
                 <table className="table">
@@ -122,23 +155,29 @@ export default function Crud() {
                             <th scope="col">Cliente</th>
                             <th scope="col">Precio</th>
                             <th scope="col">Material</th>
-                            <th scope="col">descripcion</th>
+                            <th scope="col">Descripción</th>
                             <th scope="col">Estatus</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Hora</th>
                             <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
 
                         {
-                            data.map(item => (
+                            data.length == 0 ? "No hay ordenes de trabajo" : data.map(item => (
                                 <tr key={item.id}>
 
-                                    <th scope="row">1</th>
+                                    <th scope="row">{item.orden}</th>
                                     <td>{item.nombreCliente}</td>
                                     <td>{item.precio}</td>
                                     <td>{item.material}</td>
                                     <td>{item.descripcion}</td>
-                                    <td></td>
+                                    <td>{item.estadoImpresion}</td>
+                                    <td>{item.fecha}</td>
+                                    <td>{item.hora}</td>
+
+
 
                                     <td><PrintButton objeto={item} mostrarBoton={mostrarBoton} /></td>
                                     <td><button onClick={() => borrar(item.id)} disabled={mostrarBoton}>Borrar</button></td>
