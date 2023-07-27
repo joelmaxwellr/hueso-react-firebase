@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from "react";
+
+
 
 
 const PrintButton = ({ objeto, mostrarBoton }) => {
