@@ -4,9 +4,10 @@ import { useUser, useFirebaseApp, useAuth } from 'reactfire';
 import firebaseConfig from './firebase-config';
 import "firebase/auth";
 import { getAuth, createUserWithEmailAndPassword, signOut, signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "firebase/auth";
-import Crud from './Crud.JSX';
+
 import PrintButton from './PrintButton';
 import Prueba from './Prueba';
+import Crud from './Crud.jsx';
 
 export default function Auth(props) {
   const [email, setEmail] = useState("");
