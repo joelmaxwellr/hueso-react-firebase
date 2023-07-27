@@ -1,6 +1,4 @@
-import { useState } from "react";
-
-
+import React, { useState, useEffect } from 'react';
 
 
 const PrintButton = ({ objeto, mostrarBoton }) => {
@@ -59,7 +57,7 @@ const PrintButton = ({ objeto, mostrarBoton }) => {
 
       }} disabled={mostrarBoton}>Print</button>
       <div id="print-contents" style={{ display: 'none' }}>
-        {/* Contenido específico para imprimir */}
+        
 
       </div>
     </div>

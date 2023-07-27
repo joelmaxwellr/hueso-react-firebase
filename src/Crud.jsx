@@ -3,7 +3,7 @@ import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, s
 import { async } from '@firebase/util';
 import { set } from 'firebase/database';
 import PrintButton from './PrintButton';
-import Prueba from './Prueba';
+
 import { useContext } from 'react';
 import IdPrintProvider from './IdPrintProvider';
 import { getDatabase, ref, push, onValue, remove } from "firebase/database";
@@ -197,7 +197,7 @@ export default function Crud() {
 
 
 
-                                    <td><PrintButton objeto={item} mostrarBoton={mostrarBoton} /></td>
+                                    <td> <PrintButton objeto={item} mostrarBoton={mostrarBoton} /> </td>
                                     <td><button onClick={() => borrar(item.id)} disabled={mostrarBoton}>Borrar</button></td>
                                     <td><button onClick={(e) => actualizar(item, e)} >Actualizar</button></td>
 

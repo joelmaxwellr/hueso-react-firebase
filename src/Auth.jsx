@@ -5,8 +5,7 @@ import firebaseConfig from './firebase-config';
 import "firebase/auth";
 import { getAuth, createUserWithEmailAndPassword, signOut, signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "firebase/auth";
 
-import PrintButton from './PrintButton';
-import Prueba from './Prueba';
+
 import Crud from './Crud.jsx';
 
 export default function Auth(props) {
