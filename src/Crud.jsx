@@ -6,6 +6,7 @@ import PrintButton from './PrintButton';
 import Prueba from './Prueba';
 import { useContext } from 'react';
 import IdPrintProvider from './IdPrintProvider';
+import { getDatabase, ref, push, onValue, remove } from "firebase/database";
 
 
 
@@ -26,7 +27,8 @@ export default function Crud() {
     const [mostrarBoton, setMostrarBoton] = useState(false)
     const [clienteActualizando, setClienteActualizando] = useState(null);
 
-    const db = getFirestore()
+/*     const db = getFirestore() */
+    const db = getDatabase()
 
     const limpiarCampos = (e) => {
         setNombreCliente("");
@@ -39,43 +41,48 @@ export default function Crud() {
 
 
     const crear = async () => {
-        const fechaActual = new Date().toLocaleDateString()
-        const fechaOrdens = new Date().getTime()
-        const horaActual = new Date().toLocaleTimeString()
-        setFecha(fechaActual)
-        setFechaOrden(fechaOrdens)
-        setHora(horaActual)
-        console.log(material)
+        const fechaActual = new Date();
+        const fechaOrdens = fechaActual.getTime();
+        const fechaFormateada = fechaActual.toLocaleDateString();
+        const horaFormateada = fechaActual.toLocaleTimeString();
+      
+       /*  setFecha(fechaFormateada);
+        setFechaOrden(fechaOrdens);
+        setHora(horaFormateada); */
         try {
-            const docRef = await addDoc(collection(db, "ordenes"), {
-                nombreCliente: nombreCliente,
-                material: material,
-                descripcion: descripcion,
-                precio: precio,
-                /* orden: data.length == 0 ? 1 : data[0].orden + 1, */
-                fecha: fecha,
-                fechaOrden: fechaOrden,
-                hora: hora,
-                estadoImpresion: estadoImpresion
+            await push(ref(db, "ordenes"), {
+              nombreCliente: nombreCliente,
+              material: material,
+              descripcion: descripcion,
+              precio: precio,
+              fecha: fechaFormateada,
+              fechaOrden: fechaOrdens,
+              hora: horaFormateada,
+              estadoImpresion: estadoImpresion
             });
-            console.log("Document written with ID: ", docRef.id);
-        } catch (e) {
+            console.log("Document written with ID: ");
+          } catch (e) {
             console.error("Error adding document: ", e);
-        }
-        fetchData();
-        limpiarCampos()
+          }
+          setFecha(fechaFormateada);
+          setFechaOrden(fechaOrdens);
+          setHora(horaFormateada);
+
+          fetchData();
+          limpiarCampos();
     }
 
     const fetchData = async () => {
-        const querySnapshot = await getDocs(query(collection(db, "ordenes"), orderBy("fechaOrden", "desc"))); // Reemplaza 'nombre_coleccion' con el nombre de tu colección en Firestore
-        const newArray = []
-        querySnapshot.docs.map(doc => {
-            newArray.push({ ...doc.data(), fechaOrden: doc.fechaOrden , id: doc.id })
+        const dbRef = ref(db, 'ordenes');
+        onValue(dbRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            const newArray = Object.keys(data).map((key) => ({ ...data[key], id: key }));
+            setData(newArray);
+          } else {
+            setData([]);
+          }
         });
-        /* newArray.sort((a, b) => b.fecha - a.fecha); */
-
-        setData(newArray);
-        console.log(newArray)
     };
 
     useEffect(() => {
@@ -84,9 +91,13 @@ export default function Crud() {
     }, []);
 
     const borrar = async (id) => {
-        console.log(id)
-        await deleteDoc(doc(db, "ordenes", id));
-        fetchData()
+        try {
+            await remove(ref(db, `ordenes/${id}`));
+            console.log("Document successfully deleted!");
+          } catch (e) {
+            console.error("Error deleting document: ", e);
+          }
+          fetchData();
     }
     const actualizar = (item) => {
         setNombreCliente(item.nombreCliente);
@@ -103,24 +114,27 @@ export default function Crud() {
 
     const guardarActualizacion = async () => {
         try {
-            await setDoc(doc(db, "ordenes", clienteActualizando.id), {
-                nombreCliente: nombreCliente,
-                material: material,
-                descripcion: descripcion,
-                precio: precio,
-                orden: orden,
-                fecha: fecha,
-                hora: hora,
-                estadoImpresion: estadoImpresion
+            const dbRef = ref(db, `ordenes/${clienteActualizando.id}`);
+            await set(dbRef, {
+              nombreCliente: nombreCliente,
+              material: material,
+              descripcion: descripcion,
+              precio: precio,
+              fecha: fecha,
+              fechaOrden: fechaOrden,
+              hora: hora,
+              estadoImpresion: estadoImpresion,
             });
             console.log("Document successfully updated!");
-        } catch (e) {
+          } catch (e) {
             console.error("Error updating document: ", e);
-        }
-        setActualizando(false);
-        limpiarCampos();
-        fetchData();
-        setMostrarBoton(false)
+          }
+          setActualizando(false);
+          limpiarCampos();
+          fetchData();
+          setMostrarBoton(false);
+  
+
     }
 
     const cancelar = () => {

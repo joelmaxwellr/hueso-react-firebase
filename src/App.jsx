@@ -6,8 +6,7 @@ import IdPrintProvider from './IdPrintProvider';
 
 function App() {
   const [IdPrint, setIdPrint] = useState()
-  const a = ReactToPrint
-  console.log(a)
+ 
 
   return (
     <>
